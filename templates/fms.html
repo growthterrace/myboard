@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4 fw-bold">🐔 FMS 통합 결과 (내 데이터)</h2>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-white">
+            <h6 class="m-0 fw-bold text-primary">📊 품종별 무게 분석 (Graph)</h6>
+        </div>
+        <div class="card-body text-center">
+            {% if plot_url %}
+            <img src="data:image/png;base64,{{ plot_url }}" class="img-fluid" style="max-height: 400px;" alt="품종별 그래프">
+            {% else %}
+            <div class="alert alert-warning" role="alert">
+                그래프를 그릴 데이터가 없거나, app.py에서 그림을 보내지 않았습니다.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-header py-3 bg-primary text-white">
+            <h6 class="m-0 fw-bold">📋 데이터 목록</h6>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-hover table-striped mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="p-3">육계번호</th>
+                        <th class="p-3">품종</th>
+                        <th class="p-3">성별</th>
+                        <th class="p-3">농장</th>
+                        <th class="p-3">중량(g)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in data %}
+                    <tr>
+                        <td class="p-3">{{ row['chick_no'] }}</td>
+                        <td class="p-3">{{ row['breeds'] }}</td>
+                        <td class="p-3">
+                            {% if row['gender'] == 'M' %}
+                                <span class="badge bg-primary">수컷</span>
+                            {% else %}
+                                <span class="badge bg-danger">암컷</span>
+                            {% endif %}
+                        </td>
+                        <td class="p-3">{{ row['farm'] }}</td>
+                        <td class="p-3 fw-bold">{{ row['raw_weight'] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

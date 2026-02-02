@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
+
+<style>
+    /* 1. 기본 설정 */
+    body {
+        font-family: "Pretendard Variable", Pretendard, sans-serif;
+        background-color: #f2f4f6; /* 토스 배경색 */
+        color: #333d4b;
+    }
+
+    /* 2. 카드 디자인 (Toss Style) */
+    .toss-card {
+        background-color: #ffffff;
+        border-radius: 24px;
+        border: none;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06); /* 부드러운 그림자 */
+        padding: 24px;
+        height: 100%; /* 높이 맞춤 */
+        transition: all 0.2s ease;
+    }
+    
+    .toss-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    /* 3. 텍스트 스타일 */
+    .section-title {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 12px;
+        color: #191f28;
+    }
+    
+    .kpi-label { font-size: 14px; font-weight: 600; color: #8b95a1; margin-bottom: 4px; }
+    .kpi-value { font-size: 26px; font-weight: 800; color: #333d4b; }
+    .unit { font-size: 16px; font-weight: 600; color: #6b7684; margin-left: 2px; }
+
+    /* 4. 상태 뱃지 */
+    .badge-custom {
+        padding: 6px 10px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+    .badge-pass { background-color: #e5fbf0; color: #0b9e57; }
+    .badge-fail { background-color: #fef0f0; color: #e94e4e; }
+</style>
+
+<div class="container-fluid p-4" style="max-width: 1600px;"> <div class="d-flex justify-content-between align-items-center mb-4 ps-2">
+        <div>
+            <h2 class="fw-bold m-0">FMS 통합 관제</h2>
+            <p class="text-muted m-0 small">실시간 농장 데이터 모니터링</p>
+        </div>
+        <span class="badge bg-white text-dark shadow-sm py-2 px-3 rounded-pill border">
+            <i class="fas fa-circle text-success me-1 small"></i> Live
+        </span>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-4"> <div class="toss-card d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="kpi-label">총 사육수</div>
+                    <div class="kpi-value">{{ total_count }}<span class="unit">마리</span></div>
+                </div>
+                <div class="bg-light rounded-circle p-3">
+                    <i class="fas fa-layer-group text-primary fs-4"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="toss-card d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="kpi-label">정상 개체 (Pass)</div>
+                    <div class="kpi-value">{{ pass_count }}<span class="unit">마리</span></div>
+                </div>
+                <div style="background-color: #e5fbf0;" class="rounded-circle p-3">
+                    <i class="fas fa-check text-success fs-4"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="toss-card d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="kpi-label">목표 달성률</div>
+                    <div class="kpi-value" style="color: #3182f6;">{{ pass_rate }}<span class="unit">%</span></div>
+                </div>
+                <div style="background-color: #e8f3ff;" class="rounded-circle p-3">
+                    <i class="fas fa-chart-line text-primary fs-4"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        
+        <div class="col-lg-4 col-md-12"> <div class="toss-card text-center">
+                <div class="text-start section-title">🍰 품종 분포</div>
+                <div class="d-flex align-items-center justify-content-center" style="height: 250px;">
+                    <img src="data:image/png;base64,{{ breed_plot }}" class="img-fluid" style="max-height: 100%;">
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-12">
+            <div class="toss-card text-center">
+                <div class="text-start section-title">📊 농장별 성과</div>
+                <div class="d-flex align-items-center justify-content-center" style="height: 250px;">
+                    <img src="data:image/png;base64,{{ farm_plot }}" class="img-fluid" style="max-height: 100%;">
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-12">
+            <div class="toss-card">
+                <div class="section-title">🗺️ 농장 위치</div>
+                <div style="height: 250px; width: 100%; border-radius: 16px; overflow: hidden;">
+                    {{ map_html | safe }}
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="toss-card" style="background-color: transparent; box-shadow: none; padding: 0;">
+        <div class="d-flex justify-content-between align-items-center mb-3 px-2">
+            <div class="section-title m-0">📋 실시간 개체 목록</div>
+            <span class="text-muted small bg-white px-2 py-1 rounded border">기준: 1,000g 이상</span>
+        </div>
+        
+        <div class="row g-3">
+            {% for row in data %}
+            <div class="col-xl-3 col-lg-4 col-md-6"> <div class="toss-card" style="padding: 20px; min-height: 160px;">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-secondary fw-bold small">No. {{ row['chick_no'] }}</span>
+                        {% if row['raw_weight'] and row['raw_weight'] >= 1000 %}
+                            <span class="badge-custom badge-pass">정상</span>
+                        {% else %}
+                            <span class="badge-custom badge-fail">저체중</span>
+                        {% endif %}
+                    </div>
+                    
+                    <h5 class="fw-bold mb-1">{{ row['breeds'] }}</h5>
+                    <div class="small text-muted mb-3">
+                        {{ row['farm'] }} 농장 · 
+                        {% if row['gender'] == 'M' %} 수컷 {% else %} 암컷 {% endif %}
+                    </div>
+
+                    <div class="mt-auto d-flex justify-content-between align-items-end">
+                        <div>
+                            <span class="small text-secondary">현재 중량</span><br>
+                            <span class="fs-5 fw-bold text-dark">{{ row['raw_weight'] }}g</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}
