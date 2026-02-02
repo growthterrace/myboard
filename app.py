@@ -7,6 +7,7 @@ from datetime import datetime
 import json
 
 import pandas as pd
+matplotlib.use('Agg')  # 웹 서버에서 그래프 그릴 때 필요
 import matplotlib.pyplot as plt
 import seaborn as sns
 import io
