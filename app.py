@@ -38,19 +38,13 @@ app.secret_key = os.urandom(24)
 def get_db_connection():
 
     conn = psycopg2.connect(
-
-        host=os.getenv('DB_HOST'),
-
+        host=os.getenv('3dt001.postgres.database.azure.com'),
         port=os.getenv('DB_PORT'),
-
         dbname=os.getenv('DB_NAME'),
-
         user=os.getenv('DB_USER'),
-
         password=os.getenv('DB_PASSWORD'),
-
-        #sslmode='require' #Azure를 위해 반드시 추가
-
+        options='-c timezone=Asia/Seoul',
+        sslmode='require' #Azure를 위해 반드시 추가
     )
 
     print('get_db_connection', conn)
