@@ -1,3 +1,5 @@
+matplotlib
+
 # Web Framework & Core
 Flask==3.1.2
 gunicorn
